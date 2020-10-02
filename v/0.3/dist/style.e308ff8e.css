@@ -1,0 +1,17 @@
+.door{
+    width: 50%;
+    height: 50%;
+    cursor: crosshair;
+    position: absolute;
+}
+
+.room{
+    position: relative;
+}
+
+.roomImg{
+    width: 100%;
+    height: 100%;
+}
+
+/*# sourceMappingURL=/style.e308ff8e.css.map */
