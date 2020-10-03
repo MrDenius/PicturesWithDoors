@@ -1,5 +1,5 @@
 const startRoom = "-2";
-const VERSION = 0.6;
+const VERSION = 0.5;
 let debug = true;
 
 window.room = startRoom;
