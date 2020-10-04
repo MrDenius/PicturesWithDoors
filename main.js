@@ -1,1 +1,1 @@
-location.href = "./v/0.5/";
+location.href = "./v/0.6/";
