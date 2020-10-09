@@ -16,6 +16,7 @@ document.body.onload = () => {
 
 	this.canvas = document.querySelector("canvas");
 	this.context = canvas.getContext("2d");
+	this.canvasEditor = new CanvasEditor(this.canvas);
 
 	ChangeRoom(room);
 };

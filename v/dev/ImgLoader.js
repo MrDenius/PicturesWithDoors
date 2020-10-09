@@ -43,6 +43,10 @@ class RoomLoader {
 	context;
 	isRoomLoading = false;
 	startAbort = false;
+
+	hImg;
+	lImg;
+
 	constructor(canvas, context) {
 		RoomLoader.canvas = canvas;
 		RoomLoader.context = context;
@@ -80,74 +84,113 @@ class RoomLoader {
 					return;
 				}
 			};
+			this.roomId = this.roomId || roomId;
 
-			if (imgId === undefined) imgId = roomId.imgId;
+			if (imgId === undefined) imgId = roomJson.imgId;
+
+			let effect;
+			let options = { ms: 1250 };
+			if (this.roomId == undefined || this.roomId === roomId) {
+				if (
+					(this.oldImgId && this.oldImgId != imgId) ||
+					imgId != roomJson.imgId
+				) {
+					if (Math.abs(imgId - this.oldImgId) === 1) {
+						if (imgId > this.oldImgId) {
+							//left
+							effect = "slide";
+							options.dir = "left";
+						}
+						if (imgId < this.oldImgId) {
+							//right
+							effect = "slide";
+							options.dir = "right";
+						}
+					} else {
+						if (imgId > this.oldImgId) {
+							effect = "slide";
+							options.dir = "right";
+						}
+						if (imgId < this.oldImgId) {
+							effect = "slide";
+							options.dir = "left";
+						}
+					}
+				}
+				this.oldImgId = imgId;
+			} else {
+				this.oldImgId = undefined;
+			}
+			this.oldImgId = imgId;
+
 			ImgLoader.GetImg(
 				{
 					q: 15,
-					s: "160p",
+					s: "240p",
 					imgId: imgId,
 				},
 				(img) => {
 					let abort = false;
 
 					//подгон канваса под соотношение старон картинки
-					resizeCanvas(img);
+					if (canvas.width === 300) resizeCanvas(img);
 
-					context.drawImage(
-						img,
-						0,
-						0,
-						canvas.clientWidth,
-						canvas.clientHeight
-					);
-					CheckAbort(() => (abort = true));
+					log({ effect: effect, options: options });
+					canvasEditor.ChangeImg(img, effect, options).then(() => {
+						CheckAbort(() => (abort = true));
+						this.lImg = canvas.toDataURL();
 
-					//синхронная рисовка завершена
+						//синхронная рисовка завершена
 
-					//старт асинк дорисовки картинки в нормальном качестве
-					const LoadFullImg = () => {
-						const tx = 5;
-						const ty = 5;
-						let tLoaded = 0;
-						for (let y = 0; y <= ty; y++) {
-							for (let x = 0; x <= tx; x++) {
-								imgsCash.push(
-									ImgLoader.GetImg(
-										{
-											tile: {
-												x: x,
-												y: y,
+						//старт асинк дорисовки картинки в нормальном качестве
+						const LoadFullImg = () => {
+							const tx = 5;
+							const ty = 5;
+							let tLoaded = 0;
+							for (let y = 0; y <= ty; y++) {
+								for (let x = 0; x <= tx; x++) {
+									imgsCash.push(
+										ImgLoader.GetImg(
+											{
+												tile: {
+													x: x,
+													y: y,
+												},
+												q: 85,
+												s: `${720 / ty}p`,
+												imgId: imgId,
 											},
-											q: 85,
-											s: `${720 / ty}p`,
-											imgId: imgId,
-										},
-										(img, imgSettings) => {
-											if (abort) return;
-											CheckAbort(() => (abort = true));
-											context.drawImage(
-												img,
-												(canvas.width / tx) * x,
-												(canvas.height / ty) * y,
-												canvas.clientWidth / tx,
-												canvas.clientHeight / ty
-											);
-											tLoaded++;
-											if (tLoaded === tx * ty) {
-												this.isRoomLoading = false;
-												if (onFullLoad) {
-													onFullLoad();
+											(img, imgSettings) => {
+												if (abort) return;
+												CheckAbort(
+													() => (abort = true)
+												);
+												context.drawImage(
+													img,
+													(canvas.width / tx) * x,
+													(canvas.height / ty) * y,
+													canvas.clientWidth / tx,
+													canvas.clientHeight / ty
+												);
+												tLoaded++;
+												if (tLoaded === tx * ty) {
+													this.hImg = canvas.toDataURL();
+
+													this.isRoomLoading = false;
+													if (onFullLoad) {
+														onFullLoad();
+													}
 												}
 											}
-										}
-									)
-								);
-								CheckAbort();
+										)
+									);
+									CheckAbort();
+								}
 							}
-						}
-					};
-					LoadFullImg();
+						};
+						LoadFullImg();
+					});
+					this.roomId = roomId;
 					if (onLoad) onLoad();
 				}
 			);
@@ -164,6 +207,37 @@ class RoomLoader {
 		} else {
 			drawRoom(roomJson);
 		}
+	}
+
+	direction = {
+		x: 0,
+		y: 0,
+	};
+	Move(direction, distance) {
+		//left
+		if (direction === 0) {
+			this.direction.x += distance;
+		}
+		//right
+		if (direction === 1) {
+			this.direction.x -= distance;
+		}
+
+		const img = new Image();
+		img.src = this.hImg || this.lImg;
+
+		this.Clear();
+		context.drawImage(
+			img,
+			this.direction.x,
+			0,
+			canvas.width,
+			canvas.height
+		);
+	}
+
+	Clear() {
+		context.clearRect(0, 0, canvas.width, canvas.height);
 	}
 
 	AbortLoad(onaborted) {
