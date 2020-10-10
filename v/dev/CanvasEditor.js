@@ -55,11 +55,14 @@ class CanvasEditor {
 						//TODO: Max кадров
 						const maxI = 60 * ((options.ms || 5000) / 1000);
 						let i = 0;
+						let offset = 0;
 						const interval = setInterval(() => {
 							if (i <= maxI) {
-								let offset =
-									this.canvas.clientWidth *
-									(i / (maxI / 100) / 100);
+								const scaleOffset =
+									-Math.cos((i / (maxI / 2)) * Math.PI) + 1.0;
+								offset +=
+									(this.canvas.clientWidth / maxI) *
+									scaleOffset;
 								if (dir === "left") {
 									drawImgs(-offset);
 								}
@@ -68,6 +71,7 @@ class CanvasEditor {
 								}
 							} else {
 								clearInterval(interval);
+								this.DrawImg(newImg);
 								resolve();
 							}
 							i++;

@@ -89,7 +89,7 @@ class RoomLoader {
 			if (imgId === undefined) imgId = roomJson.imgId;
 
 			let effect;
-			let options = { ms: 1250 };
+			let options = { ms: 1000 };
 			if (this.roomId == undefined || this.roomId === roomId) {
 				if (
 					(this.oldImgId && this.oldImgId != imgId) ||
@@ -125,8 +125,8 @@ class RoomLoader {
 
 			ImgLoader.GetImg(
 				{
-					q: 15,
-					s: "240p",
+					q: 45,
+					s: "360p",
 					imgId: imgId,
 				},
 				(img) => {
@@ -189,9 +189,10 @@ class RoomLoader {
 							}
 						};
 						LoadFullImg();
+
+						this.roomId = roomId;
+						if (onLoad) onLoad();
 					});
-					this.roomId = roomId;
-					if (onLoad) onLoad();
 				}
 			);
 		};
