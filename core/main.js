@@ -1,6 +1,6 @@
 const startRoom = getParamValue("sr") || "-2";
 const RoomsPath = getParamValue("rp") || "../Rooms/Home/";
-const VERSION = getParamValue("v") || "0.6.1";
+const VERSION = getParamValue("v") || "0.6.2";
 let debug = true;
 
 window.room = startRoom;
@@ -91,6 +91,9 @@ function ChangeRoom(room, updateDoors, newImgId) {
 					null,
 					() => {
 						LoadDoors(canvas); //отрисовка дверей
+						//Рисовка LRNuttons
+						CreateLRButtons();
+
 						Loading(false);
 						window.scrollTo(
 							window.innerWidth / 2,
@@ -129,9 +132,6 @@ function ChangeRoom(room, updateDoors, newImgId) {
 						"p.info"
 					).innerText = `Вы в начальной комнате`;
 				}
-
-				//Рисовка LRNuttons
-				CreateLRButtons();
 			});
 	}
 
@@ -149,6 +149,8 @@ function ChangeRoom(room, updateDoors, newImgId) {
 function CreateLRButtons() {
 	const lButton = document.querySelector(".lButton");
 	const rButton = document.querySelector(".rButton");
+
+	this.imgIdChanging = null;
 
 	if (roomSettings.imgLoop) {
 		//Левая кнопка
@@ -197,6 +199,13 @@ function CreateLRButtons() {
 			rButton.style.display = "none";
 		}
 	}
+
+	const HideLR = () => {
+		if (rButton) rButton.style.display = "none";
+		if (lButton) lButton.style.display = "none";
+	};
+	rButton.addEventListener("click", HideLR);
+	lButton.addEventListener("click", HideLR);
 }
 
 //TODO: Кнопки навигации
@@ -271,11 +280,11 @@ function CreateDoor(door, img) {
 	$door.className = "door";
 
 	if (!roomSettings.version || room.version >= 1) {
-		$door.style.left = `${img.width * (door.x / 100)}`;
-		$door.style.top = `${img.height * (door.y / 100)}`;
+		$door.style.left = `${img.clientWidth * (door.x / 100)}`;
+		$door.style.top = `${img.clientHeight * (door.y / 100)}`;
 
-		$door.style.height = img.height * (door.h / 100);
-		$door.style.width = img.width * (door.w / 100);
+		$door.style.height = img.clientHeight * (door.h / 100);
+		$door.style.width = img.clientWidth * (door.w / 100);
 
 		if (door.description) {
 			$door.title = door.description;

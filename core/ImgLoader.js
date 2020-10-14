@@ -168,8 +168,8 @@ class RoomLoader {
 													img,
 													(canvas.width / tx) * x,
 													(canvas.height / ty) * y,
-													canvas.clientWidth / tx,
-													canvas.clientHeight / ty
+													canvas.width / tx,
+													canvas.height / ty
 												);
 												tLoaded++;
 												if (tLoaded === tx * ty) {
