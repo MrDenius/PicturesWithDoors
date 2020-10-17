@@ -1,6 +1,6 @@
 const startRoom = getParamValue("sr") || "-2";
 const RoomsPath = getParamValue("rp") || "../Rooms/Home/";
-const VERSION = getParamValue("v") || "0.6.2";
+const VERSION = getParamValue("v") || "0.6.3";
 let debug = true;
 
 window.room = startRoom;
@@ -9,6 +9,7 @@ let oldRoomSettings;
 let roomSettings;
 let ImgLoader = new RoomImgLoader(startRoom);
 let roomLoader = new RoomLoader(this.canvas, this.context);
+let doorsCreator = new DoorsCreator();
 
 let roomsHistory = [];
 
@@ -50,7 +51,7 @@ function ChangeRoom(room, updateDoors, newImgId) {
 			ImgLoader = new RoomImgLoader(room);
 		}
 	}
-	window.room = room.toString();
+	window.room = room.toString() || startRoom;
 
 	//Удаление дверей
 	document.querySelectorAll(".door").forEach((element) => {
@@ -140,7 +141,10 @@ function ChangeRoom(room, updateDoors, newImgId) {
 		LoadDoors(canvas);
 	}
 
-	//log(roomsHistory.length)
+	console.log(roomsHistory);
+	document.querySelectorAll(".back").forEach((element) => {
+		element.parentNode.removeChild(element);
+	});
 	if (roomsHistory.length != 0 && !updateDoors) {
 		CreateNavigtionButtons();
 	}
@@ -211,10 +215,6 @@ function CreateLRButtons() {
 //TODO: Кнопки навигации
 //Лучше не трогать пока работает))
 function CreateNavigtionButtons() {
-	document.querySelectorAll(".back").forEach((element) => {
-		element.parentNode.removeChild(element);
-	});
-
 	const $mb = document.createElement("button");
 	const $mr = document.createElement("button");
 	let $img = document.createElement("img");
@@ -276,56 +276,10 @@ function LoadDoors($img, w, h) {
 }
 
 function CreateDoor(door, img) {
-	const $door = document.createElement("button");
+	let $door = document.createElement("button");
 	$door.className = "door";
 
-	if (!roomSettings.version || room.version >= 1) {
-		$door.style.left = `${img.clientWidth * (door.x / 100)}`;
-		$door.style.top = `${img.clientHeight * (door.y / 100)}`;
-
-		$door.style.height = img.clientHeight * (door.h / 100);
-		$door.style.width = img.clientWidth * (door.w / 100);
-
-		if (door.description) {
-			$door.title = door.description;
-		} else {
-			$door.title = `Комната ${door.room}`;
-		}
-
-		if (door.color) {
-			if (door.color === "none") {
-				$door.style.backgroundColor = "rgba(0,0,0,0)";
-			} else {
-				$door.style.backgroundColor = door.color;
-			}
-		}
-
-		if (door.img) {
-			const $doorImg = document.createElement("img");
-			if (door.img[0] === ".") {
-				$doorImg.src = door.img;
-			} else {
-				$doorImg.src = `${RoomsPath}${room}/${door.img}}`;
-			}
-			$doorImg.className = "doorImg";
-			$door.appendChild($doorImg);
-		}
-
-		//$door.innerText = "DEBUGDEBUGDEBUGDEBUGDEBUGDEBUGDEBUGDEBUG"
-		if (door.opacity) {
-			$door.style.opacity = door.opacity;
-		} else {
-			$door.style.opacity = 0.25;
-		}
-
-		$door.onclick = () => {
-			if (door.room) {
-				roomsHistory.push(room);
-				//room = door.room
-				ChangeRoom(door.room);
-			}
-		};
-	}
+	$door = doorsCreator.GetDoor($door, img, door, roomSettings.VERSION);
 
 	return $door;
 }
