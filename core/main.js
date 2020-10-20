@@ -1,6 +1,6 @@
 const startRoom = getParamValue("sr") || "-2";
 const RoomsPath = getParamValue("rp") || "../Rooms/Home/";
-const VERSION = getParamValue("v") || "0.6.3";
+const VERSION = getParamValue("v") || "0.7";
 let debug = true;
 
 window.room = startRoom;
@@ -11,7 +11,7 @@ let ImgLoader = new RoomImgLoader(startRoom);
 let roomLoader = new RoomLoader(this.canvas, this.context);
 let doorsCreator = new DoorsCreator();
 
-let roomsHistory = [];
+let roomsHistory = JSON.parse(getParamValue("h") || "[]");
 
 document.body.onload = () => {
 	document.querySelector("p.version").textContent = `v ${VERSION}`;
@@ -19,6 +19,14 @@ document.body.onload = () => {
 	this.canvas = document.querySelector("canvas");
 	this.context = canvas.getContext("2d");
 	this.canvasEditor = new CanvasEditor(this.canvas);
+
+	if (roomsHistory != []) {
+		fetch(`${RoomsPath}${roomsHistory[roomsHistory.length - 1]}/room.json`)
+			.then((response) => response.json())
+			.then((oldJson) => {
+				oldRoomSettings = oldJson;
+			});
+	}
 
 	ChangeRoom(room);
 };
@@ -53,6 +61,12 @@ function ChangeRoom(room, updateDoors, newImgId) {
 	}
 	window.room = room.toString() || startRoom;
 
+	//Сохранение в cookie
+	Cookies.set(
+		`${RoomsPath}`,
+		JSON.stringify({ room: room, history: roomsHistory })
+	);
+
 	//Удаление дверей
 	document.querySelectorAll(".door").forEach((element) => {
 		element.parentNode.removeChild(element);
@@ -82,7 +96,6 @@ function ChangeRoom(room, updateDoors, newImgId) {
 
 				if (newImgId != undefined) imgId = newImgId;
 				else imgId = roomSettings.imgId || "0";
-				console.log(imgId);
 
 				//TODO: Рисовка комнаты
 
@@ -121,8 +134,12 @@ function ChangeRoom(room, updateDoors, newImgId) {
 							const doorRoom = data.doors.filter(
 								(door) => door.room === window.room
 							);
-							if (doorRoom && doorRoom[0].description) {
-								roomName = doorRoom[0].description;
+							if (
+								doorRoom &&
+								doorRoom.length != 0 &&
+								doorRoom[0].description
+							) {
+								roomName = doorRoom[0].description || "ERROR";
 								document.querySelector(
 									"p.info"
 								).innerText = `Вы в комнате - ${roomName}.`;
@@ -141,7 +158,6 @@ function ChangeRoom(room, updateDoors, newImgId) {
 		LoadDoors(canvas);
 	}
 
-	console.log(roomsHistory);
 	document.querySelectorAll(".back").forEach((element) => {
 		element.parentNode.removeChild(element);
 	});
@@ -309,6 +325,6 @@ function getParamValue(paramName) {
 	var qArray = url.split("&"); //get key-value pairs
 	for (var i = 0; i < qArray.length; i++) {
 		var pArr = qArray[i].split("="); //split key and value
-		if (pArr[0] == paramName) return pArr[1]; //return value
+		if (pArr[0] == paramName) return decodeURI(pArr[1]); //return value
 	}
 }
