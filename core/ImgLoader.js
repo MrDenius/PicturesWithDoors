@@ -26,11 +26,18 @@ class RoomImgLoader {
 			imgSrc += `&imgId=${imgSettings.imgId}`;
 		}
 
+		//let cImg = CacheManager.GetById(imgSrc);
+		//if (cImg) {
+		//	onload(cImg, imgSettings);
+		//	console.log("CACHE LOAD");
+		//	return cImg;
+		//}
 		const img = new Image();
 		img.src = imgSrc;
 
 		let imgLoaded = false;
 		img.addEventListener("load", () => {
+			CacheManager.Add(img, imgSrc);
 			onload(img, imgSettings);
 		});
 

@@ -1,6 +1,6 @@
 const startRoom = getParamValue("sr") || "-2";
 const RoomsPath = getParamValue("rp") || "../Rooms/Home/";
-const VERSION = getParamValue("v") || "0.7";
+const VERSION = getParamValue("v") || "0.8";
 let debug = true;
 
 window.room = startRoom;
@@ -62,10 +62,10 @@ function ChangeRoom(room, updateDoors, newImgId) {
 	window.room = room.toString() || startRoom;
 
 	//Сохранение в cookie
-	Cookies.set(
-		`${RoomsPath}`,
-		JSON.stringify({ room: room, history: roomsHistory })
-	);
+	//Cookies.set(
+	//	`${RoomsPath}`,
+	//	JSON.stringify({ room: room, history: roomsHistory })
+	//);
 
 	//Удаление дверей
 	document.querySelectorAll(".door").forEach((element) => {
@@ -165,6 +165,17 @@ function ChangeRoom(room, updateDoors, newImgId) {
 		CreateNavigtionButtons();
 	}
 }
+
+document.addEventListener("swipe", (event) => {
+	if (event.detail.left) {
+		if (document.querySelector(".lButton")?.style.display != "none")
+			document.querySelector(".lButton").click();
+	}
+	if (event.detail.right) {
+		if (document.querySelector(".rButton")?.style.display != "none")
+			document.querySelector(".rButton").click();
+	}
+});
 
 function CreateLRButtons() {
 	const lButton = document.querySelector(".lButton");
