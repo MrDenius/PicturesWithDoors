@@ -1,3 +1,4 @@
+return;
 (function (factory) {
 	window.SwipeEvent = factory();
 })(function () {
@@ -12,6 +13,7 @@
 
 		let pixelsForSwipe = 250;
 		let startPos = 0;
+		let zooming = false;
 
 		if (
 			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -28,7 +30,7 @@
 		function MouseUp(X) {
 			document.removeEventListener("mousemove", MouseMove);
 			document.removeEventListener("touchmove", MouseMove);
-			if (Math.abs(startPos - X) >= pixelsForSwipe)
+			if (Math.abs(startPos - X) >= pixelsForSwipe && !zooming)
 				if (startPos - X < 0) {
 					document.dispatchEvent(CreateSwipeEvent("left"));
 				} else {

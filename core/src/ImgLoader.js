@@ -1,4 +1,4 @@
-class RoomImgLoader {
+export class RoomImgLoader {
 	constructor(roomId) {
 		this.roomId = roomId;
 	}
@@ -8,7 +8,7 @@ class RoomImgLoader {
 	}
 
 	GetImg(imgSettings, onload) {
-		let imgSrc = `${RoomsPath}?room=${this.roomId}`;
+		let imgSrc = `${window.RoomsPath}?room=${this.roomId}`;
 		if (
 			imgSettings.tile &&
 			Number.isInteger(imgSettings.tile.x) &&
@@ -37,7 +37,7 @@ class RoomImgLoader {
 
 		let imgLoaded = false;
 		img.addEventListener("load", () => {
-			CacheManager.Add(img, imgSrc);
+			//CacheManager.Add(img, imgSrc);
 			onload(img, imgSettings);
 		});
 
@@ -45,7 +45,7 @@ class RoomImgLoader {
 	}
 }
 
-class RoomLoader {
+export class RoomLoader {
 	canvas;
 	context;
 	isRoomLoading = false;
@@ -66,6 +66,8 @@ class RoomLoader {
 			);
 			return;
 		}
+
+		let ImgLoader = new RoomImgLoader(roomId);
 
 		this.isRoomLoading = true;
 
@@ -141,6 +143,7 @@ class RoomLoader {
 
 					//подгон канваса под соотношение старон картинки
 					if (canvas.width === 300) resizeCanvas(img);
+					if (canvas.width != canvas.clientWidth) resizeCanvas(img);
 
 					canvasEditor.ChangeImg(img, effect, options).then(() => {
 						CheckAbort(() => (abort = true));

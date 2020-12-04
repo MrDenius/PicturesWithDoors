@@ -1,27 +1,54 @@
-const startRoom = getParamValue("sr") || "-2";
-const RoomsPath = getParamValue("rp") || "../Rooms/Home/";
-const VERSION = getParamValue("v") || "0.8";
+import { RoomImgLoader, RoomLoader } from "./ImgLoader";
+import DoorsCreator from "./DoorsCreator";
+import CanvasEditor from "./CanvasEditor";
+import Hammer from "hammerjs";
+import Cookie from "js-cookie";
+
+import "./style.css";
+
+let rightArrow;
+
+function LoadImgs() {
+	toDataUrl(
+		require("./imgs/right-arrow128.png").default,
+		(img) => (rightArrow = img)
+	);
+}
+LoadImgs();
+
+console.log(rightArrow);
+
+window.startRoom = getParamValue("sr") || "-2";
+window.RoomsPath = getParamValue("rp") || "./Rooms/Home/";
+window.VERSION = getParamValue("v") || "0.8";
 let debug = true;
 
 window.room = startRoom;
 let imgId = 0;
 let oldRoomSettings;
 let roomSettings;
+
 let ImgLoader = new RoomImgLoader(startRoom);
-let roomLoader = new RoomLoader(this.canvas, this.context);
-let doorsCreator = new DoorsCreator();
+let hammer = new Hammer(document.body);
 
-let roomsHistory = JSON.parse(getParamValue("h") || "[]");
+window.roomsHistory = JSON.parse(getParamValue("h") || "[]");
 
-document.body.onload = () => {
+document.querySelector("body").onload = () => {
 	document.querySelector("p.version").textContent = `v ${VERSION}`;
 
-	this.canvas = document.querySelector("canvas");
-	this.context = canvas.getContext("2d");
-	this.canvasEditor = new CanvasEditor(this.canvas);
+	window.canvas = document.querySelector("canvas");
+	window.context = canvas.getContext("2d");
+	window.canvasEditor = new CanvasEditor(window.canvas);
 
-	if (roomsHistory != []) {
-		fetch(`${RoomsPath}${roomsHistory[roomsHistory.length - 1]}/room.json`)
+	window.roomLoader = new RoomLoader(window.canvas, window.context);
+	window.doorsCreator = new DoorsCreator();
+
+	if (window.roomsHistory != []) {
+		fetch(
+			`${RoomsPath}${
+				window.roomsHistory[window.roomsHistory.length - 1]
+			}/room.json`
+		)
 			.then((response) => response.json())
 			.then((oldJson) => {
 				oldRoomSettings = oldJson;
@@ -32,13 +59,13 @@ document.body.onload = () => {
 };
 
 window.addEventListener("resize", () => {
-	const roomImg = document.querySelector(".roomImg");
+	const roomImg = document.querySelector(".main");
 	if (window.innerWidth / window.innerHeight < 1) {
-		roomImg.style.height = "100%";
-		roomImg.style.width = "auto";
+		//roomImg.style.height = "100%";
+		//roomImg.style.width = "auto";
 	} else {
-		roomImg.style.height = "auto";
-		roomImg.style.width = "100%";
+		//roomImg.style.height = "auto";
+		//roomImg.style.width = "100%";
 	}
 	ChangeRoom(window.room, null, imgId);
 });
@@ -49,7 +76,7 @@ function CreateImg(src) {
 	return $img;
 }
 
-function ChangeRoom(room, updateDoors, newImgId) {
+window.ChangeRoom = function (room, updateDoors, newImgId) {
 	if (!updateDoors) {
 		//TODO: если фул смена комнаты
 		Loading(true);
@@ -64,7 +91,7 @@ function ChangeRoom(room, updateDoors, newImgId) {
 	//Сохранение в cookie
 	//Cookies.set(
 	//	`${RoomsPath}`,
-	//	JSON.stringify({ room: room, history: roomsHistory })
+	//	JSON.stringify({ room: room, history: window.roomsHistory })
 	//);
 
 	//Удаление дверей
@@ -118,14 +145,14 @@ function ChangeRoom(room, updateDoors, newImgId) {
 				);
 
 				//TODO: Изменение title
-				if (roomsHistory.length != 0 && !updateDoors) {
+				if (window.roomsHistory.length != 0 && !updateDoors) {
 					document.querySelector(
 						"p.info"
 					).innerText = `Вы в комнате - ${window.room}.`;
 
 					fetch(
 						`${RoomsPath}${
-							roomsHistory[roomsHistory.length - 1]
+							window.roomsHistory[window.roomsHistory.length - 1]
 						}/room.json`
 					)
 						.then((response) => response.json())
@@ -161,18 +188,29 @@ function ChangeRoom(room, updateDoors, newImgId) {
 	document.querySelectorAll(".back").forEach((element) => {
 		element.parentNode.removeChild(element);
 	});
-	if (roomsHistory.length != 0 && !updateDoors) {
+	if (window.roomsHistory.length != 0 && !updateDoors) {
 		CreateNavigtionButtons();
 	}
-}
+};
 
-document.addEventListener("swipe", (event) => {
-	if (event.detail.left) {
-		if (document.querySelector(".lButton")?.style.display != "none")
+hammer.get("pan").set({ enable: true, direction: Hammer.DIRECTION_HORIZONTAL });
+
+hammer
+	.get("swipe")
+	.set({ direction: Hammer.DIRECTION_HORIZONTAL, enable: true });
+hammer.on("swipe", (event) => {
+	if (event.direction === 4) {
+		if (
+			document.querySelector(".lButton") &&
+			document.querySelector(".lButton").style.display != "none"
+		)
 			document.querySelector(".lButton").click();
 	}
-	if (event.detail.right) {
-		if (document.querySelector(".rButton")?.style.display != "none")
+	if (event.direction === 2) {
+		if (
+			document.querySelector(".rButton") &&
+			document.querySelector(".rButton").style.display != "none"
+		)
 			document.querySelector(".rButton").click();
 	}
 });
@@ -181,7 +219,15 @@ function CreateLRButtons() {
 	const lButton = document.querySelector(".lButton");
 	const rButton = document.querySelector(".rButton");
 
-	this.imgIdChanging = null;
+	if (
+		!lButton.querySelector("img").src &&
+		!rButton.querySelector("img").src
+	) {
+		lButton.querySelector("img").src = rightArrow;
+		rButton.querySelector("img").src = rightArrow;
+	}
+
+	window.imgIdChanging = null;
 
 	if (roomSettings.imgLoop) {
 		//Левая кнопка
@@ -239,6 +285,9 @@ function CreateLRButtons() {
 	lButton.addEventListener("click", HideLR);
 }
 
+import imgHome from "./imgs/sydney-opera-house.png";
+import imgBack from "./imgs/back-arrow.png";
+
 //TODO: Кнопки навигации
 //Лучше не трогать пока работает))
 function CreateNavigtionButtons() {
@@ -246,7 +295,7 @@ function CreateNavigtionButtons() {
 	const $mr = document.createElement("button");
 	let $img = document.createElement("img");
 
-	$img.src = "./imgs/back-arrow.png";
+	$img.src = imgBack;
 	$img.className = "backImg";
 
 	$mb.className = "back";
@@ -256,8 +305,8 @@ function CreateNavigtionButtons() {
 	$img.onload = () => document.body.appendChild($mb);
 
 	$mb.onclick = () => {
-		let prevRoom = roomsHistory[roomsHistory.length - 1];
-		roomsHistory.splice(roomsHistory.length - 1);
+		let prevRoom = window.roomsHistory[window.roomsHistory.length - 1];
+		window.roomsHistory.splice(window.roomsHistory.length - 1);
 		$mb.parentNode.removeChild($mb);
 		$mr.parentNode.removeChild($mr);
 		//log(prevRoom)
@@ -267,7 +316,7 @@ function CreateNavigtionButtons() {
 
 	$img = document.createElement("img");
 
-	$img.src = "./imgs/sydney-opera-house.png";
+	$img.src = imgHome;
 	$img.className = "backImg";
 
 	$mr.className = "back backToRoot";
@@ -277,8 +326,8 @@ function CreateNavigtionButtons() {
 	$img.onload = () => document.body.appendChild($mr);
 
 	$mr.onclick = () => {
-		let prevRoom = roomsHistory[0];
-		roomsHistory = [];
+		let prevRoom = window.roomsHistory[0];
+		window.roomsHistory = [];
 		$mb.parentNode.removeChild($mb);
 		$mr.parentNode.removeChild($mr);
 		//log(prevRoom)
@@ -306,12 +355,12 @@ function CreateDoor(door, img) {
 	let $door = document.createElement("button");
 	$door.className = "door";
 
-	$door = doorsCreator.GetDoor($door, img, door, roomSettings.VERSION);
+	$door = doorsCreator.GetDoor($door, img, door, roomSettings.version);
 
 	return $door;
 }
 
-$loading = document.querySelector("div.loading");
+let $loading = document.querySelector("div.loading");
 
 function Loading(enable) {
 	if (enable) {
@@ -338,4 +387,18 @@ function getParamValue(paramName) {
 		var pArr = qArray[i].split("="); //split key and value
 		if (pArr[0] == paramName) return decodeURI(pArr[1]); //return value
 	}
+}
+
+function toDataUrl(url, callback) {
+	var xhr = new XMLHttpRequest();
+	xhr.onload = function () {
+		var reader = new FileReader();
+		reader.onloadend = function () {
+			callback(reader.result);
+		};
+		reader.readAsDataURL(xhr.response);
+	};
+	xhr.open("GET", url);
+	xhr.responseType = "blob";
+	xhr.send();
 }

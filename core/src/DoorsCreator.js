@@ -1,4 +1,4 @@
-class DoorsCreator {
+export default class DoorsCreator {
 	GetDoor($door, img, doorCfg, roomCfgVersion) {
 		roomCfgVersion = roomCfgVersion || 1;
 
@@ -44,12 +44,15 @@ class DoorsCreator {
 				$door.onclick = () => {
 					if (doorCfg.room) {
 						if (
-							roomsHistory[roomsHistory.length - 1] ===
-							doorCfg.room
+							window.roomsHistory[
+								window.roomsHistory.length - 1
+							] === doorCfg.room
 						) {
-							roomsHistory.splice(roomsHistory.length - 1);
+							window.roomsHistory.splice(
+								window.roomsHistory.length - 1
+							);
 						} else {
-							roomsHistory.push(room);
+							window.roomsHistory.push(room);
 						}
 						ChangeRoom(doorCfg.room);
 					}

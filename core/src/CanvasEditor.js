@@ -1,4 +1,4 @@
-class CanvasEditor {
+export default class CanvasEditor {
 	canvas;
 	context;
 	constructor(canvas) {

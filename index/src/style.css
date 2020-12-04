@@ -2,7 +2,7 @@ body {
 	margin: 0;
 	padding: 0;
 	background-color: rgb(10, 10, 85);
-	background-image: url(res/abstract-3557682_960_720.webp);
+	background-image: url("./res/abstract-3557682_960_720.jpg");
 	background-size: 100%;
 }
 

@@ -3,8 +3,8 @@
 		{
 			"name": "Моя хата",
 			"sr": "-2",
-			"rp": "../Rooms/Home/",
-			"img": "./Rooms/Home/-2/IMG_20201004_164059.jpg"
+			"rp": "./Rooms/Home/",
+			"img": "./core/Rooms/Home/-2/IMG_20201004_164059.jpg"
 		},
 		{
 			"name": "дурка"

@@ -1,3 +1,4 @@
-dist/
+dist
 debug.log
 .cache/
+node_modules

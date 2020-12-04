@@ -1,4 +1,12 @@
-fetch("./Rooms/rooms.json").then((res) =>
+const Cookies = require("js-cookie");
+
+import "./style.css";
+
+const roomImgDefault = require("./res/roomImgDefault.jpg");
+
+console.log(roomImgDefault);
+
+fetch("./core/Rooms/rooms.json").then((res) =>
 	res.json().then((roomsJson) => {
 		RoomsLoad(roomsJson);
 	})
@@ -17,7 +25,7 @@ function CreateRoom(roomSettings) {
 
 	const roomImg = new Image();
 	roomImg.className = "location-img";
-	roomImg.src = roomSettings.img || "./res/roomImgDefault.jpg";
+	roomImg.src = roomSettings.img || roomImgDefault.default;
 
 	const roomDesc = document.createElement("p");
 	roomDesc.className = "location-text";
