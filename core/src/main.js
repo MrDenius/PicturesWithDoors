@@ -20,7 +20,7 @@ console.log(rightArrow);
 
 window.startRoom = getParamValue("sr") || "-2";
 window.RoomsPath = getParamValue("rp") || "./Rooms/Home/";
-window.VERSION = getParamValue("v") || "0.8";
+window.VERSION = getParamValue("v") || "0.9";
 let debug = true;
 
 window.room = startRoom;
@@ -89,10 +89,10 @@ window.ChangeRoom = function (room, updateDoors, newImgId) {
 	window.room = room.toString() || startRoom;
 
 	//Сохранение в cookie
-	//Cookies.set(
-	//	`${RoomsPath}`,
-	//	JSON.stringify({ room: room, history: window.roomsHistory })
-	//);
+	Cookie.set(
+		`${RoomsPath}`,
+		JSON.stringify({ room: room, history: window.roomsHistory })
+	);
 
 	//Удаление дверей
 	document.querySelectorAll(".door").forEach((element) => {

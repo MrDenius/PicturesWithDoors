@@ -52,30 +52,40 @@ const ArgsHandler = (args) => {
 
 		switch (arg) {
 			case "start":
+				let md;
+				if (i + 1 < myArgs.length) {
+					md = myArgs[i + 1];
+				}
 				mode = "development";
-				procIndex = cmd.run(
-					`cd .\\index && .\\node_modules\\.bin\\webpack --mode ${mode} --watch`,
-					undefined,
-					{ env: { NODE_ENV: mode } }
-				);
-				procCore = cmd.run(
-					`cd .\\core && .\\node_modules\\.bin\\webpack --mode ${mode} --watch`,
-					undefined,
-					{ env: { NODE_ENV: mode } }
-				);
+				if (!md || md === "index")
+					procIndex = cmd.run(
+						`cd .\\index && .\\node_modules\\.bin\\webpack --mode ${mode} --watch`,
+						undefined,
+						{ env: { NODE_ENV: mode } }
+					);
+				if (!md || md === "core")
+					procCore = cmd.run(
+						`cd .\\core && .\\node_modules\\.bin\\webpack --mode ${mode} --watch`,
+						undefined,
+						{ env: { NODE_ENV: mode } }
+					);
 
-				procIndex.stdout.on("data", (data) =>
-					console.log(`<INDEX> => ${data}`)
-				);
-				procCore.stdout.on("data", (data) =>
-					console.log(`<CORE> => ${data}`)
-				);
-				procIndex.stderr.on("data", (data) =>
-					console.log(`<INDEX> => ${data}`)
-				);
-				procCore.stderr.on("data", (data) =>
-					console.log(`<CORE> => ${data}`)
-				);
+				if (!md || md === "index") {
+					procIndex.stdout.on("data", (data) =>
+						console.log(`<INDEX> => ${data}`)
+					);
+					procIndex.stderr.on("data", (data) =>
+						console.log(`<INDEX> => ${data}`)
+					);
+				}
+				if (!md || md === "core") {
+					procCore.stdout.on("data", (data) =>
+						console.log(`<CORE> => ${data}`)
+					);
+					procCore.stderr.on("data", (data) =>
+						console.log(`<CORE> => ${data}`)
+					);
+				}
 				break;
 
 			case "stats":

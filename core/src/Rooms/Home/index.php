@@ -1,6 +1,6 @@
 <?php
-    $maxTilesX = 5;
-    $maxTilesY = 5;
+    $maxTilesX = 8;
+    $maxTilesY = 6;
 
     //получение основных переменных
     $roomId = $_GET['room'];

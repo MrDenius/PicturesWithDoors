@@ -7,7 +7,24 @@ export class RoomImgLoader {
 		this.roomId = roomId;
 	}
 
+	loadHistory = [];
+
 	GetImg(imgSettings, onload) {
+		const CreateImage = (src) => {
+			const img = new Image();
+			const StartLoadImg = () => {
+				this.loadHistory.push(img);
+				img.src = imgSrc;
+			};
+			img.StartLoadImg = StartLoadImg;
+
+			img.addEventListener("load", () => {
+				this.loadHistory.splice(this.loadHistory.indexOf(img), 1);
+				onload(img, imgSettings);
+			});
+			return img;
+		};
+
 		let imgSrc = `${window.RoomsPath}?room=${this.roomId}`;
 		if (
 			imgSettings.tile &&
@@ -26,20 +43,8 @@ export class RoomImgLoader {
 			imgSrc += `&imgId=${imgSettings.imgId}`;
 		}
 
-		//let cImg = CacheManager.GetById(imgSrc);
-		//if (cImg) {
-		//	onload(cImg, imgSettings);
-		//	console.log("CACHE LOAD");
-		//	return cImg;
-		//}
-		const img = new Image();
-		img.src = imgSrc;
-
-		let imgLoaded = false;
-		img.addEventListener("load", () => {
-			//CacheManager.Add(img, imgSrc);
-			onload(img, imgSettings);
-		});
+		const img = CreateImage();
+		img.StartLoadImg();
 
 		return img;
 	}
@@ -132,10 +137,13 @@ export class RoomLoader {
 			}
 			this.oldImgId = imgId;
 
+			//debug
+			let timeStart = Date.now();
+
 			ImgLoader.GetImg(
 				{
-					q: 45,
-					s: "360p",
+					q: 50,
+					s: "240p",
 					imgId: imgId,
 				},
 				(img) => {
@@ -153,8 +161,8 @@ export class RoomLoader {
 
 						//старт асинк дорисовки картинки в нормальном качестве
 						const LoadFullImg = () => {
-							const tx = 5;
-							const ty = 5;
+							const tx = 8;
+							const ty = 6;
 							let tLoaded = 0;
 							for (let y = 0; y <= ty; y++) {
 								for (let x = 0; x <= tx; x++) {
@@ -176,14 +184,30 @@ export class RoomLoader {
 												);
 												context.drawImage(
 													img,
-													(canvas.width / tx) * x,
-													(canvas.height / ty) * y,
+													Math.floor(
+														((canvas.width - 0) /
+															tx) *
+															x
+													),
+													Math.floor(
+														((canvas.height - 0) /
+															ty) *
+															y
+													),
 													canvas.width / tx,
 													canvas.height / ty
 												);
 												tLoaded++;
 												if (tLoaded === tx * ty) {
 													this.hImg = canvas.toDataURL();
+
+													//debug
+													console.log(
+														`Full load end: ${
+															Date.now() -
+															timeStart
+														} ms`
+													);
 
 													this.isRoomLoading = false;
 													if (onFullLoad) {
@@ -207,13 +231,13 @@ export class RoomLoader {
 		};
 
 		if (!roomJson) {
-			$.getJSON(`${RoomsPath}${room}/room.json`, "", function (
-				data,
-				textStatus,
-				jqXHR
-			) {
-				drawRoom(data);
-			});
+			$.getJSON(
+				`${RoomsPath}${room}/room.json`,
+				"",
+				function (data, textStatus, jqXHR) {
+					drawRoom(data);
+				}
+			);
 		} else {
 			drawRoom(roomJson);
 		}

@@ -6,6 +6,8 @@
 		"dev": "PWDScripts dev",
 		"build": "PWDScripts build",
 		"start": "PWDScripts start",
+		"startindex": "PWDScripts start index",
+		"startcore": "PWDScripts start core",
 		"stats": "PWDScripts stats",
 		"test": "yarn add -D file:PWDScripts && PWDScripts dev",
 		"pwds": "yarn add -D file:PWDScripts"
