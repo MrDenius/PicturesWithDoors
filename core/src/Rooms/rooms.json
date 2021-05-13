@@ -7,7 +7,10 @@
 			"img": "./core/Rooms/Home/-2/IMG_20201004_164059.jpg"
 		},
 		{
-			"name": "дурка"
+			"name": "дурка",
+			"sr": "f3",
+			"rp": "./Rooms/faza/",
+			"img": "./core/Rooms/faza/f3/IMG_20210512_182742.jpg"
 		},
 		{
 			"name": "дурка"

@@ -3,6 +3,7 @@ import DoorsCreator from "./DoorsCreator";
 import CanvasEditor from "./CanvasEditor";
 import Hammer from "hammerjs";
 import Cookie from "js-cookie";
+import Analytics from "./Analytics";
 
 import "./style.css";
 
@@ -59,14 +60,6 @@ document.querySelector("body").onload = () => {
 };
 
 window.addEventListener("resize", () => {
-	const roomImg = document.querySelector(".main");
-	if (window.innerWidth / window.innerHeight < 1) {
-		//roomImg.style.height = "100%";
-		//roomImg.style.width = "auto";
-	} else {
-		//roomImg.style.height = "auto";
-		//roomImg.style.width = "100%";
-	}
 	ChangeRoom(window.room, null, imgId);
 });
 
@@ -77,6 +70,14 @@ function CreateImg(src) {
 }
 
 window.ChangeRoom = function (room, updateDoors, newImgId) {
+	//anal
+	Analytics.Step({
+		type: "changeroom",
+		roomsHistory: window.roomsHistory,
+		RoomsPath: RoomsPath,
+		VERSION: window.VERSION,
+	});
+
 	if (!updateDoors) {
 		//TODO: если фул смена комнаты
 		Loading(true);
